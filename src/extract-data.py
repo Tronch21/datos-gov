@@ -3,17 +3,20 @@ from sodapy import Socrata
 
 client = Socrata("www.datos.gov.co", None)
 
-# client = Socrata("https://www.datos.gov.co/api/v3/views/h2jg-r3zg/query.json",
-#                MyAppTokenHere,
-#                username="davidfsalgadog3@gmail.com",
-#                password="Holamundo24028" )
-
 results = client.get("h2jg-r3zg", limit=2000)
 
-df = pd.read_parquet("datos.parquet", columns=["NOMBREENTIDAD", "PERSONA_NATURAL", "PERSONA_JURIDICA"])
-
-print(df)
-
 results_df = pd.DataFrame.from_records(results)
+
+# Save the DataFrame to a Parquet file
+results_df.to_parquet("data.parquet", engine="pyarrow", compression="zstd", index=False)
+
+results_df["tipoentidad"] = pd.to_numeric(results_df["tipoentidad"], errors = 'coerce')
+results_df["codigoentidad"] = pd.to_numeric(results_df["codigoentidad"], errors = 'coerce')
+results_df["fechacorte"] = pd.to_datetime(results_df["fechacorte"])
+results_df["cod_uca"] = pd.to_numeric(results_df["cod_uca"], errors = 'coerce')
+results_df["subcuenta"] = pd.to_numeric(results_df["subcuenta"], errors = 'coerce')
+results_df["persona_natural"] = pd.to_numeric(results_df["persona_natural"], errors = 'coerce')
+results_df["persona_juridica"] = pd.to_numeric(results_df["persona_juridica"], errors = 'coerce')
+results_df["total_tarjetas"] = pd.to_numeric(results_df["total_tarjetas"], errors = 'coerce')
 
 print(results_df.head())
